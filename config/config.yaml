@@ -1,0 +1,31 @@
+# PROJECT SENTINEL - Configuration
+# Phase 2: Weather Data Ingestion Engine
+
+data_lake:
+  path: "/home/ubuntu/project-sentinel/data"
+  retention_hours: 24
+  
+weather_api:
+  base_url: "https://weathernext-api.com"
+  ensemble_members: 64
+  update_interval_minutes: 60
+  
+dask:
+  workers: 2
+  threads_per_worker: 1
+  memory_limit: "800MB"
+  dashboard_port: 8787
+  
+logging:
+  level: "INFO"
+  file: "/home/ubuntu/project-sentinel/logs/data_watcher.log"
+  max_size_mb: 100
+  backup_count: 5
+  
+gcp_bridge:
+  cloud_run_url: "https://sentinel-reasoning-xxxxx-uc.a.run.app"
+  timeout_seconds: 30
+  
+telegram:
+  bot_token: "${TELEGRAM_BOT_TOKEN}"
+  chat_id: "${TELEGRAM_CHAT_ID}"

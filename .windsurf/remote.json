@@ -1,0 +1,1 @@
+{"remote": {"name": "vultr-server", "host": "100.109.76.69", "user": "root", "port": 22, "transport": "ssh", "tailscale": true, "shell": "/bin/bash", "connectionOptions": {"StrictHostKeyChecking": "no", "ConnectTimeout": 10, "RequestTTY": "force"}, "environment": {"TERM": "xterm-256color"}}}
