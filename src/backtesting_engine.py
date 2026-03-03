@@ -176,11 +176,21 @@ class BacktestingEngine:
     
     def _generate_signal(self, weather: HistoricalWeatherPoint,
                           threshold: float = 2.0) -> Tuple[str, float]:
-        """Generate enhanced trading signal using ensemble spread and confidence
+        """Generate enhanced trading signal using ensemble consensus and confidence
         
         Returns (action, confidence) tuple
         """
         abs_delta = abs(weather.delta)
+        
+        # ENSEMBLE CONSENSUS FILTERING - NEW
+        ensemble_consensus = self._calculate_ensemble_consensus(weather)
+        if ensemble_consensus < 0.7:  # Require 70% consensus
+            return "HOLD", weather.confidence
+        
+        # WEATHER PATTERN WEIGHTING - NEW
+        pattern_weight = self._calculate_pattern_weight(weather)
+        if pattern_weight < 0.8:  # Require strong weather pattern
+            return "HOLD", weather.confidence
         
         # Dynamic threshold based on ensemble confidence
         if weather.confidence > 0.8:
@@ -196,26 +206,73 @@ class BacktestingEngine:
             # High uncertainty = more conservative
             spread_factor = max(0.5, 1.0 - (weather.ensemble_std / 5.0))
         
-        adjusted_confidence = weather.confidence * spread_factor
+        # Boost confidence for high consensus
+        consensus_boost = min(1.2, 1.0 + (ensemble_consensus - 0.7) * 0.5)
+        adjusted_confidence = weather.confidence * spread_factor * consensus_boost
         
         if abs_delta < dynamic_threshold:
             return "HOLD", adjusted_confidence
         
-        # Enhanced signal logic with confidence weighting
+        # Enhanced signal logic with consensus weighting
         if weather.delta > dynamic_threshold:
-            # Strong BUY signal with high confidence
-            if adjusted_confidence > 0.7:
-                return "BUY", min(0.95, adjusted_confidence * 1.2)
+            # Strong BUY signal with high confidence and consensus
+            if adjusted_confidence > 0.7 and ensemble_consensus > 0.8:
+                return "BUY", min(0.95, adjusted_confidence * 1.3)
             else:
                 return "BUY", adjusted_confidence
         elif weather.delta < -dynamic_threshold:
-            # Strong SELL signal with high confidence
-            if adjusted_confidence > 0.7:
-                return "SELL", min(0.95, adjusted_confidence * 1.2)
+            # Strong SELL signal with high confidence and consensus
+            if adjusted_confidence > 0.7 and ensemble_consensus > 0.8:
+                return "SELL", min(0.95, adjusted_confidence * 1.3)
             else:
                 return "SELL", adjusted_confidence
         
         return "HOLD", adjusted_confidence
+    
+    def _calculate_ensemble_consensus(self, weather: HistoricalWeatherPoint) -> float:
+        """Calculate ensemble consensus from weather data"""
+        
+        # Base consensus from confidence
+        base_consensus = weather.confidence
+        
+        # Adjust based on ensemble spread if available
+        if hasattr(weather, 'ensemble_std') and weather.ensemble_std > 0:
+            # Lower spread = higher consensus
+            spread_adjustment = max(0.5, 1.0 - (weather.ensemble_std / 10.0))
+            base_consensus *= spread_adjustment
+        
+        # Adjust based on delta magnitude (stronger signals = higher consensus)
+        delta_strength = min(1.0, abs(weather.delta) / 5.0)
+        consensus_boost = 1.0 + (delta_strength * 0.2)
+        
+        final_consensus = min(0.95, base_consensus * consensus_boost)
+        return final_consensus
+    
+    def _calculate_pattern_weight(self, weather: HistoricalWeatherPoint) -> float:
+        """Calculate weather pattern weight for signal strength"""
+        
+        # Base weight from temperature anomaly
+        temp_anomaly = abs(weather.actual_temp - 15.0)  # Tokyo average ~15°C
+        
+        # Pattern detection
+        if temp_anomaly > 10.0:  # Extreme temperature
+            pattern_weight = 1.3  # Heat wave or cold snap
+        elif temp_anomaly > 5.0:  # Strong anomaly
+            pattern_weight = 1.2  # Unusual warming/cooling
+        elif temp_anomaly > 2.0:  # Moderate anomaly
+            pattern_weight = 1.1  # Notable pattern
+        else:
+            pattern_weight = 1.0  # Normal conditions
+        
+        # Adjust based on delta strength
+        delta_strength = min(1.0, abs(weather.delta) / 3.0)
+        pattern_weight *= (1.0 + delta_strength * 0.2)
+        
+        # Adjust based on confidence
+        confidence_factor = 0.8 + (weather.confidence * 0.4)
+        pattern_weight *= confidence_factor
+        
+        return min(1.5, pattern_weight)
     
     def _generate_ensemble_signal(self, ensemble_forecast, threshold: float = 2.0) -> Tuple[str, float]:
         """Generate signal from full ensemble forecast data"""
