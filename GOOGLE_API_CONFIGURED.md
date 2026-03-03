@@ -5,7 +5,7 @@
 Your Google AI Pro API key has been successfully configured and tested for PROJECT SENTINEL.
 
 ### 🔑 API Key Details
-- **Key**: REDACTED_API_KEY
+- **Key**: Set via GEMINI_API_KEY environment variable
 - **Model**: gemini-2.5-pro (latest stable version)
 - **Status**: ✅ Active and tested
 - **Rate Limits**: ✅ 100% success rate in tests

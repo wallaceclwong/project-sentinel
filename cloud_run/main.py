@@ -74,7 +74,7 @@ start_time = time.time()
 
 # Initialize Gemini Pro
 try:
-    genai.configure(api_key=os.environ.get("GEMINI_API_KEY", "REDACTED_API_KEY"))
+    genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
     model = genai.GenerativeModel('gemini-2.5-pro')  # Updated to use latest model
     logger.info("✓ Gemini Pro 2.5 initialized")
 except Exception as e:

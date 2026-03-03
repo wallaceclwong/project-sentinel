@@ -8,7 +8,7 @@ set -e
 PROJECT_ID="your-gcp-project-id"
 SERVICE_NAME="sentinel-reasoning"
 REGION="asia-east2"  # Hong Kong
-GEMINI_API_KEY="REDACTED_API_KEY"
+GEMINI_API_KEY="${GEMINI_API_KEY:?Error: GEMINI_API_KEY environment variable not set}"
 
 echo "🚀 Deploying PROJECT SENTINEL - Gemini Pro Reasoning Service"
 echo "Region: $REGION"

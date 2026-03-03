@@ -64,3 +64,5 @@ temp/
 # API Keys and Credentials
 setup_gcp_credentials.md
 deploy_cloud_run.sh
+deploy_cloud_run_with_key.sh
+sentinel_usage_report_*.json
