@@ -144,13 +144,16 @@ class RiskManager:
                 risk_score=0.4
             )
         
+        # Calculate adaptive position size based on confidence
+        adaptive_size = self._calculate_adaptive_position_size(size, confidence, price)
+        
         # Calculate risk score
-        risk_score = self._calculate_risk_score(size, price, confidence)
+        risk_score = self._calculate_risk_score(adaptive_size, price, confidence)
         
         return RiskCheck(
             approved=True,
-            reason="All risk checks passed",
-            adjusted_size=size,
+            reason="Trade approved with adaptive sizing",
+            adjusted_size=adaptive_size,
             risk_score=risk_score
         )
     
@@ -211,6 +214,55 @@ class RiskManager:
         confidence_risk = (1 - confidence) * 0.2
         
         return size_risk + exposure_risk + loss_risk + confidence_risk
+    
+    def _calculate_adaptive_position_size(self, base_size: float, confidence: float, price: float) -> float:
+        """Calculate adaptive position size based on confidence and market conditions"""
+        
+        # Confidence-based scaling
+        if confidence >= 0.9:
+            confidence_multiplier = 1.5  # Very high confidence = larger position
+        elif confidence >= 0.8:
+            confidence_multiplier = 1.2  # High confidence = slightly larger
+        elif confidence >= 0.6:
+            confidence_multiplier = 1.0  # Normal confidence = base size
+        elif confidence >= 0.4:
+            confidence_multiplier = 0.7  # Low confidence = smaller position
+        else:
+            confidence_multiplier = 0.4  # Very low confidence = much smaller
+        
+        # Daily PNL adjustment (reduce size when losing)
+        pnl_adjustment = 1.0
+        if self.daily_pnl < 0:
+            pnl_factor = abs(self.daily_pnl) / self.max_daily_loss
+            pnl_adjustment = max(0.5, 1.0 - pnl_factor * 0.5)  # Reduce size up to 50%
+        
+        # Exposure adjustment (reduce size as we approach limits)
+        exposure_ratio = self.total_exposure / self.max_total_exposure
+        exposure_adjustment = max(0.3, 1.0 - exposure_ratio * 0.7)  # Reduce size up to 70%
+        
+        # Trade count adjustment (reduce size if many trades today)
+        today_trades = self._count_today_trades()
+        trade_adjustment = 1.0
+        if today_trades > self.max_trades_per_day * 0.7:
+            trade_factor = (today_trades / self.max_trades_per_day - 0.7) / 0.3
+            trade_adjustment = max(0.6, 1.0 - trade_factor * 0.4)  # Reduce size up to 40%
+        
+        # Calculate final adaptive size
+        adaptive_size = base_size * confidence_multiplier * pnl_adjustment * exposure_adjustment * trade_adjustment
+        
+        # Ensure we don't exceed maximum position size
+        max_allowed = min(self.max_position_size, self.max_total_exposure - self.total_exposure)
+        adaptive_size = min(adaptive_size, max_allowed / price if price > 0 else base_size)
+        
+        # Minimum size check
+        min_size = base_size * 0.1  # Don't go below 10% of base size
+        adaptive_size = max(adaptive_size, min_size)
+        
+        logger.debug(f"Adaptive sizing: {base_size:.2f} -> {adaptive_size:.2f} "
+                    f"(conf: {confidence:.2f}, pnl_adj: {pnl_adjustment:.2f}, "
+                    f"exp_adj: {exposure_adjustment:.2f}, trade_adj: {trade_adjustment:.2f})")
+        
+        return adaptive_size
     
     def get_status(self) -> Dict[str, Any]:
         """Get current risk status"""
