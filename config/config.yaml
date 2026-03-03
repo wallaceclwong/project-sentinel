@@ -35,3 +35,23 @@ gemini_pro:
 telegram:
   bot_token: "${TELEGRAM_BOT_TOKEN}"
   chat_id: "${TELEGRAM_CHAT_ID}"
+
+# Phase 4: Trading & Execution
+trading:
+  paper_trading: true
+  require_2fa: true
+  
+polymarket:
+  api_key: "${POLYMARKET_API_KEY}"
+  api_secret: "${POLYMARKET_API_SECRET}"
+  clob_url: "https://clob.polymarket.com"
+  gamma_url: "https://gamma-api.polymarket.com"
+
+risk_management:
+  max_position_size: 500
+  max_daily_loss: 100
+  max_total_exposure: 2000
+  max_trades_per_day: 20
+  min_confidence: 0.60
+  max_spread_pct: 5.0
+  circuit_breaker_cooldown_seconds: 3600
