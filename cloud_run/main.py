@@ -11,12 +11,12 @@ import logging
 from datetime import datetime
 from typing import Dict, Any, Optional
 import json
+import time
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import google.generativeai as genai
-from google.cloud import aiplatform
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -67,14 +67,45 @@ class TradeSignal(BaseModel):
     market_contract: str
     weather_impact_score: float
 
+# Usage tracking
+api_calls_count = 0
+total_tokens_used = 0
+start_time = time.time()
+
 # Initialize Gemini Pro
 try:
-    genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-    model = genai.GenerativeModel('gemini-pro')
-    logger.info("✓ Gemini Pro initialized")
+    genai.configure(api_key=os.environ.get("GEMINI_API_KEY", "REDACTED_API_KEY"))
+    model = genai.GenerativeModel('gemini-2.5-pro')  # Updated to use latest model
+    logger.info("✓ Gemini Pro 2.5 initialized")
 except Exception as e:
     logger.error(f"Failed to initialize Gemini Pro: {e}")
     model = None
+
+def track_api_usage(prompt: str, response: str, response_time: float):
+    """Track API usage for cost monitoring"""
+    global api_calls_count, total_tokens_used
+    
+    # Estimate tokens (rough calculation: 1 token ≈ 4 characters)
+    prompt_tokens = len(prompt) // 4
+    response_tokens = len(response) // 4
+    total_tokens = prompt_tokens + response_tokens
+    
+    api_calls_count += 1
+    total_tokens_used += total_tokens
+    
+    # Calculate cost (Gemini Pro pricing)
+    cost_per_1k_tokens = 0.00025  # $0.00025 per 1K tokens
+    cost = (total_tokens / 1000) * cost_per_1k_tokens
+    
+    logger.info(f"API Usage: Call #{api_calls_count}, {total_tokens} tokens, "
+               f"{response_time:.2f}s, ${cost:.6f}")
+    
+    return {
+        "call_number": api_calls_count,
+        "tokens_used": total_tokens,
+        "response_time": response_time,
+        "estimated_cost": cost
+    }
 
 class GeminiReasoningEngine:
     """Gemini Pro powered reasoning engine for trade validation"""
@@ -116,72 +147,72 @@ RESPONSE FORMAT (JSON only):
 Provide only the JSON response, no additional text.
 """
     
-    async def validate_trade(self, request: TradeValidationRequest) -> Optional[TradeSignal]:
+    async def validate_trade(self, weather_data: WeatherData, market_sentiment: MarketSentiment) -> Dict[str, Any]:
         """Validate trade using Gemini Pro reasoning"""
         if not self.model:
             raise HTTPException(status_code=503, detail="Gemini Pro not available")
         
+        start_time = time.time()
+        
         try:
-            # Format prompt with request data
+            # Construct the reasoning prompt
             prompt = self.reasoning_prompt_template.format(
-                region=request.weather_data.region,
-                max_delta=request.weather_data.max_delta,
-                min_delta=request.weather_data.min_delta,
-                mean_delta=request.weather_data.mean_delta,
-                std_delta=request.weather_data.std_delta,
-                confidence_score=request.weather_data.confidence_score,
-                impact_score=request.weather_data.impact_score,
-                polymarket_volume=request.market_sentiment.polymarket_volume,
-                price_movement=request.market_sentiment.price_movement,
-                social_sentiment=request.market_sentiment.social_sentiment
+                region=weather_data.region,
+                max_delta=weather_data.max_delta,
+                min_delta=weather_data.min_delta,
+                mean_delta=weather_data.mean_delta,
+                std_delta=weather_data.std_delta,
+                confidence_score=weather_data.confidence_score,
+                impact_score=weather_data.impact_score,
+                polymarket_volume=market_sentiment.polymarket_volume,
+                price_movement=market_sentiment.price_movement,
+                social_sentiment=market_sentiment.social_sentiment
             )
-            
-            logger.info(f"Sending trade validation request to Gemini Pro")
             
             # Generate response
-            response = await asyncio.to_thread(
-                self.model.generate_content, prompt
-            )
+            response = self.model.generate_content(prompt)
+            response_time = time.time() - start_time
             
-            # Parse JSON response
+            if not response or not response.text:
+                raise HTTPException(status_code=500, detail="No response from Gemini Pro")
+            
+            # Track usage
+            usage_stats = track_api_usage(prompt, response.text, response_time)
+            
+            # Parse the response
             response_text = response.text.strip()
-            if response_text.startswith("```json"):
-                response_text = response_text.replace("```json", "").replace("```", "").strip()
             
-            result = json.loads(response_text)
+            # Try to extract JSON from the response
+            if "```json" in response_text:
+                json_start = response_text.find("```json") + 7
+                json_end = response_text.find("```", json_start)
+                json_text = response_text[json_start:json_end].strip()
+            else:
+                json_text = response_text
             
-            # Validate response structure
-            if not all(key in result for key in ["action", "confidence", "reasoning", "market_contract", "weather_impact_score"]):
-                raise ValueError("Invalid response structure from Gemini Pro")
+            try:
+                trade_decision = json.loads(json_text)
+            except json.JSONDecodeError:
+                # Fallback: create a basic response from the text
+                trade_decision = {
+                    "action": "HOLD",
+                    "confidence": 0.5,
+                    "reasoning": response_text[:200] + "..." if len(response_text) > 200 else response_text,
+                    "market_contract": f"Weather_{weather_data.region}",
+                    "weather_impact_score": weather_data.impact_score
+                }
             
-            # Validate action
-            if result["action"] not in ["BUY", "SELL", "HOLD"]:
-                raise ValueError(f"Invalid action: {result['action']}")
+            # Add usage stats to response
+            trade_decision["usage_stats"] = usage_stats
             
-            # Validate confidence
-            if not (0 <= result["confidence"] <= 1):
-                raise ValueError(f"Invalid confidence: {result['confidence']}")
+            logger.info(f"Trade validation completed: {trade_decision.get('action', 'UNKNOWN')} "
+                       f"(confidence: {trade_decision.get('confidence', 0):.2f})")
             
-            trade_signal = TradeSignal(
-                timestamp=request.timestamp,
-                action=result["action"],
-                confidence=result["confidence"],
-                reasoning=result["reasoning"],
-                market_contract=result["market_contract"],
-                weather_impact_score=result["weather_impact_score"]
-            )
+            return trade_decision
             
-            logger.info(f"Trade validation completed: {trade_signal.action} "
-                       f"(confidence: {trade_signal.confidence:.2f})")
-            
-            return trade_signal
-            
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse Gemini Pro response: {e}")
-            raise HTTPException(status_code=500, detail="Invalid response from reasoning engine")
         except Exception as e:
             logger.error(f"Trade validation failed: {e}")
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail=f"Trade validation failed: {str(e)}")
 
 # Initialize reasoning engine
 reasoning_engine = GeminiReasoningEngine()
@@ -210,7 +241,7 @@ async def validate_trade(request: TradeValidationRequest):
             raise HTTPException(status_code=400, detail="Invalid weather impact score")
         
         # Process trade validation
-        trade_signal = await reasoning_engine.validate_trade(request)
+        trade_signal = await reasoning_engine.validate_trade(request.weather_data, request.market_sentiment)
         
         return trade_signal
         
@@ -227,6 +258,35 @@ async def root():
         "service": "Sentinel Reasoning Service",
         "version": "1.0.0",
         "status": "running",
+        "timestamp": datetime.now().isoformat()
+    }
+
+@app.get("/usage")
+async def usage_dashboard():
+    """Usage and cost monitoring dashboard"""
+    uptime = time.time() - start_time
+    cost_per_1k_tokens = 0.00025
+    
+    return {
+        "service": "Sentinel Reasoning Service",
+        "usage_stats": {
+            "total_api_calls": api_calls_count,
+            "total_tokens_used": total_tokens_used,
+            "uptime_seconds": uptime,
+            "avg_calls_per_hour": api_calls_count / (uptime / 3600) if uptime > 0 else 0,
+            "estimated_total_cost": (total_tokens_used / 1000) * cost_per_1k_tokens,
+            "cost_per_call": ((total_tokens_used / 1000) * cost_per_1k_tokens) / api_calls_count if api_calls_count > 0 else 0
+        },
+        "model_info": {
+            "model_name": "gemini-2.5-pro",
+            "cost_per_1k_tokens": cost_per_1k_tokens,
+            "available": model is not None
+        },
+        "limits": {
+            "daily_calls_limit": 1000,
+            "monthly_budget_usd": 50.0,
+            "pro_tier_benefits": "60 requests/minute, 1M context window"
+        },
         "timestamp": datetime.now().isoformat()
     }
 

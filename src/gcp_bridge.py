@@ -13,6 +13,10 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 import numpy as np
+import time
+
+# Import usage monitor for cost control
+from usage_monitor import monitor_api_call, can_make_api_call, get_usage_dashboard
 
 logging.basicConfig(
     level=logging.INFO,
@@ -101,7 +105,14 @@ class GCPBridge:
     async def send_weather_delta_to_gemini(self, delta: WeatherDelta, 
                                          market_sentiment: Dict[str, Any]) -> Optional[TradeSignal]:
         """Send weather delta to Gemini Pro for trade validation"""
+        start_time = time.time()
+        
         try:
+            # Check rate limits before making API call
+            if not can_make_api_call():
+                logger.warning("Rate limit or budget reached - skipping API call")
+                return None
+            
             weather_score = self.calculate_weather_delta_score(delta)
             
             payload = {
@@ -125,8 +136,21 @@ class GCPBridge:
                 f"{self.cloud_run_url}/validate-trade",
                 json=payload
             ) as response:
+                response_time = time.time() - start_time
+                
                 if response.status == 200:
                     result = await response.json()
+                    
+                    # Estimate token usage (rough calculation)
+                    estimated_tokens = len(str(payload)) // 4 + len(str(result)) // 4
+                    
+                    # Record successful API call
+                    monitor_api_call(
+                        model="gemini-2.5-pro",
+                        tokens_used=estimated_tokens,
+                        response_time=response_time,
+                        success=True
+                    )
                     
                     return TradeSignal(
                         timestamp=datetime.fromisoformat(result['timestamp']),
@@ -137,14 +161,50 @@ class GCPBridge:
                         weather_impact_score=result['weather_impact_score']
                     )
                 else:
-                    logger.error(f"Gemini Pro request failed: {response.status}")
+                    error_msg = f"Gemini Pro request failed: {response.status}"
+                    logger.error(error_msg)
+                    
+                    # Record failed API call
+                    monitor_api_call(
+                        model="gemini-2.5-pro",
+                        tokens_used=0,
+                        response_time=response_time,
+                        success=False,
+                        error_message=error_msg
+                    )
+                    
                     return None
                     
         except asyncio.TimeoutError:
-            logger.error("GCP Cloud Run request timed out")
+            response_time = time.time() - start_time
+            error_msg = "GCP Cloud Run request timed out"
+            logger.error(error_msg)
+            
+            # Record timeout
+            monitor_api_call(
+                model="gemini-2.5-pro",
+                tokens_used=0,
+                response_time=response_time,
+                success=False,
+                error_message=error_msg
+            )
+            
             return None
+            
         except Exception as e:
-            logger.error(f"Failed to send weather delta to Gemini: {e}")
+            response_time = time.time() - start_time
+            error_msg = f"Failed to send weather delta to Gemini: {e}"
+            logger.error(error_msg)
+            
+            # Record failed API call
+            monitor_api_call(
+                model="gemini-2.5-pro",
+                tokens_used=0,
+                response_time=response_time,
+                success=False,
+                error_message=error_msg
+            )
+            
             return None
     
     async def health_check(self) -> bool:

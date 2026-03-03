@@ -56,15 +56,30 @@ pip install -r requirements.txt
 python src/data_watcher.py
 ```
 
-### Remote Deployment (Tokyo)
+### Remote Development (Tokyo)
 ```bash
-# Connect via Tailscale SSH
-ssh root@100.109.76.69
+# Connect via Windsurf with optimized shell
+# Custom profile loads automatically with:
+# - Enhanced colored prompt with git status
+# - Project-specific aliases (sentinel, logs, venv)
+# - Auto virtual environment activation
+# - System-wide sentinel commands
 
-# Start service
-sudo systemctl start sentinel
-sudo systemctl status sentinel
+# Available commands:
+sentinel-info          # Show project status
+sentinel-dev           # Activate venv + change to project dir
+test-sentinel          # Run component tests
+start-sentinel         # Start sentinel service
+logs                   # Monitor log files
+venv                   # Activate virtual environment
 ```
+
+### Shell Configuration Features
+- **Enhanced Prompt**: Color-coded with git branch status
+- **Smart Aliases**: Quick navigation and git commands
+- **Auto-completion**: Git and command completion
+- **Project Shortcuts**: Direct access to logs, data, venv
+- **System Commands**: Global sentinel utilities
 
 ### GCP Cloud Run Deployment
 ```bash
