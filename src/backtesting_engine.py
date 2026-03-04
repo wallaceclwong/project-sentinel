@@ -13,9 +13,11 @@ import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
-
+from data_fetcher import SentinelDataFetcher
+from polymarket_client import PolymarketClient
 from risk_manager import RiskManager
 from risk_reward_optimizer import RiskRewardOptimizer, MarketConditions, ExitStrategy
+from weathernext2_client import WeatherNext2Client
 
 logger = logging.getLogger(__name__)
 
@@ -126,6 +128,7 @@ class BacktestingEngine:
             max_total_exposure=initial_capital * 0.20
         )
         self.risk_optimizer = RiskRewardOptimizer()
+        self.weathernext2 = WeatherNext2Client()
     
     def generate_historical_weather(self, start_date: str, end_date: str,
                                      region: str = "Tokyo") -> List[HistoricalWeatherPoint]:
@@ -273,6 +276,41 @@ class BacktestingEngine:
         pattern_weight *= confidence_factor
         
         return min(1.5, pattern_weight)
+    
+    async def generate_weathernext2_signal(self, location: str) -> Tuple[str, float]:
+        """Generate enhanced trading signal using WeatherNext 2 real-time data"""
+        
+        try:
+            # Get comprehensive trading signals from WeatherNext 2
+            signals_data = await self.weathernext2.get_trading_signals(location)
+            
+            if "error" in signals_data:
+                logger.warning(f"WeatherNext 2 error: {signals_data['error']}")
+                return "HOLD", 0.5
+            
+            signals = signals_data["signals"]
+            ensemble = signals_data["ensemble"]
+            
+            # Enhanced confidence calculation with real ensemble data
+            base_confidence = signals["final_confidence"]
+            
+            # Apply our existing consensus and pattern filters
+            if ensemble.consensus < 0.7:
+                return "HOLD", base_confidence
+            
+            # Check signal strength
+            if signals["signal_strength"] < 0.3:
+                return "HOLD", base_confidence
+            
+            # Enhanced signal with WeatherNext 2 data
+            action = signals["temperature_signal"]
+            confidence = min(0.95, base_confidence * 1.1)  # Boost for real data
+            
+            return action, confidence
+            
+        except Exception as e:
+            logger.error(f"Error generating WeatherNext 2 signal: {e}")
+            return "HOLD", 0.5
     
     def _generate_ensemble_signal(self, ensemble_forecast, threshold: float = 2.0) -> Tuple[str, float]:
         """Generate signal from full ensemble forecast data"""
