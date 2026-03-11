@@ -1,0 +1,194 @@
+{
+  "collection_date": "2026-03-11T18:17:13.565387",
+  "race_date": "2026-03-11",
+  "venue": "Happy Valley",
+  "total_races": 9,
+  "successful_races": 9,
+  "race_results": [
+    {
+      "race_number": 1,
+      "url": "https://racing.hkjc.com/en-us/local/information/racecard?racedate=2026/03/11&Racecourse=HV&RaceNo=1",
+      "found": true,
+      "page_content_length": 240201,
+      "Place": [
+        "Language(window.location.href);",
+        "Language(url));",
+        "Language(window.location.href);",
+        "Language(url);",
+        "Language(urlhref) {",
+        "(/English/gi, \"Chinese\").replace(/en-us/gi, \"zh-hk\");",
+        "(/English/gi, \"English\").replace(/en-us/gi, \"en-us\");",
+        "d</td>",
+        "AllChar(text, inp) {",
+        "(inp, '');",
+        "AllChar(keyword, charArr[i]);",
+        "(/^\\s+/, '').replace(/\\s+$/, '');"
+      ]
+    },
+    {
+      "race_number": 2,
+      "url": "https://racing.hkjc.com/en-us/local/information/racecard?racedate=2026/03/11&Racecourse=HV&RaceNo=2",
+      "found": true,
+      "page_content_length": 240146,
+      "Place": [
+        "Language(window.location.href);",
+        "Language(url));",
+        "Language(window.location.href);",
+        "Language(url);",
+        "Language(urlhref) {",
+        "(/English/gi, \"Chinese\").replace(/en-us/gi, \"zh-hk\");",
+        "(/English/gi, \"English\").replace(/en-us/gi, \"en-us\");",
+        "d</td>",
+        "AllChar(text, inp) {",
+        "(inp, '');",
+        "AllChar(keyword, charArr[i]);",
+        "(/^\\s+/, '').replace(/\\s+$/, '');"
+      ]
+    },
+    {
+      "race_number": 3,
+      "url": "https://racing.hkjc.com/en-us/local/information/racecard?racedate=2026/03/11&Racecourse=HV&RaceNo=3",
+      "found": true,
+      "page_content_length": 240170,
+      "Place": [
+        "Language(window.location.href);",
+        "Language(url));",
+        "Language(window.location.href);",
+        "Language(url);",
+        "Language(urlhref) {",
+        "(/English/gi, \"Chinese\").replace(/en-us/gi, \"zh-hk\");",
+        "(/English/gi, \"English\").replace(/en-us/gi, \"en-us\");",
+        "d</td>",
+        "AllChar(text, inp) {",
+        "(inp, '');",
+        "AllChar(keyword, charArr[i]);",
+        "(/^\\s+/, '').replace(/\\s+$/, '');"
+      ]
+    },
+    {
+      "race_number": 4,
+      "url": "https://racing.hkjc.com/en-us/local/information/racecard?racedate=2026/03/11&Racecourse=HV&RaceNo=4",
+      "found": true,
+      "page_content_length": 240092,
+      "Place": [
+        "Language(window.location.href);",
+        "Language(url));",
+        "Language(window.location.href);",
+        "Language(url);",
+        "Language(urlhref) {",
+        "(/English/gi, \"Chinese\").replace(/en-us/gi, \"zh-hk\");",
+        "(/English/gi, \"English\").replace(/en-us/gi, \"en-us\");",
+        "d</td>",
+        "AllChar(text, inp) {",
+        "(inp, '');",
+        "AllChar(keyword, charArr[i]);",
+        "(/^\\s+/, '').replace(/\\s+$/, '');"
+      ]
+    },
+    {
+      "race_number": 5,
+      "url": "https://racing.hkjc.com/en-us/local/information/racecard?racedate=2026/03/11&Racecourse=HV&RaceNo=5",
+      "found": true,
+      "page_content_length": 229378,
+      "Place": [
+        "Language(window.location.href);",
+        "Language(url));",
+        "Language(window.location.href);",
+        "Language(url);",
+        "Language(urlhref) {",
+        "(/English/gi, \"Chinese\").replace(/en-us/gi, \"zh-hk\");",
+        "(/English/gi, \"English\").replace(/en-us/gi, \"en-us\");",
+        "d</td>",
+        "AllChar(text, inp) {",
+        "(inp, '');",
+        "AllChar(keyword, charArr[i]);",
+        "(/^\\s+/, '').replace(/\\s+$/, '');"
+      ]
+    },
+    {
+      "race_number": 6,
+      "url": "https://racing.hkjc.com/en-us/local/information/racecard?racedate=2026/03/11&Racecourse=HV&RaceNo=6",
+      "found": true,
+      "page_content_length": 240075,
+      "Place": [
+        "Language(window.location.href);",
+        "Language(url));",
+        "Language(window.location.href);",
+        "Language(url);",
+        "Language(urlhref) {",
+        "(/English/gi, \"Chinese\").replace(/en-us/gi, \"zh-hk\");",
+        "(/English/gi, \"English\").replace(/en-us/gi, \"en-us\");",
+        "d</td>",
+        "AllChar(text, inp) {",
+        "(inp, '');",
+        "AllChar(keyword, charArr[i]);",
+        "(/^\\s+/, '').replace(/\\s+$/, '');"
+      ]
+    },
+    {
+      "race_number": 7,
+      "url": "https://racing.hkjc.com/en-us/local/information/racecard?racedate=2026/03/11&Racecourse=HV&RaceNo=7",
+      "found": true,
+      "page_content_length": 239966,
+      "Place": [
+        "Language(window.location.href);",
+        "Language(url));",
+        "Language(window.location.href);",
+        "Language(url);",
+        "Language(urlhref) {",
+        "(/English/gi, \"Chinese\").replace(/en-us/gi, \"zh-hk\");",
+        "(/English/gi, \"English\").replace(/en-us/gi, \"en-us\");",
+        "d</td>",
+        "AllChar(text, inp) {",
+        "(inp, '');",
+        "AllChar(keyword, charArr[i]);",
+        "(/^\\s+/, '').replace(/\\s+$/, '');"
+      ]
+    },
+    {
+      "race_number": 8,
+      "url": "https://racing.hkjc.com/en-us/local/information/racecard?racedate=2026/03/11&Racecourse=HV&RaceNo=8",
+      "found": true,
+      "page_content_length": 232878,
+      "Place": [
+        "Language(window.location.href);",
+        "Language(url));",
+        "Language(window.location.href);",
+        "Language(url);",
+        "Language(urlhref) {",
+        "(/English/gi, \"Chinese\").replace(/en-us/gi, \"zh-hk\");",
+        "(/English/gi, \"English\").replace(/en-us/gi, \"en-us\");",
+        "d</td>",
+        "AllChar(text, inp) {",
+        "(inp, '');",
+        "AllChar(keyword, charArr[i]);",
+        "(/^\\s+/, '').replace(/\\s+$/, '');"
+      ]
+    },
+    {
+      "race_number": 9,
+      "url": "https://racing.hkjc.com/en-us/local/information/racecard?racedate=2026/03/11&Racecourse=HV&RaceNo=9",
+      "found": true,
+      "page_content_length": 240088,
+      "Place": [
+        "Language(window.location.href);",
+        "Language(url));",
+        "Language(window.location.href);",
+        "Language(url);",
+        "Language(urlhref) {",
+        "(/English/gi, \"Chinese\").replace(/en-us/gi, \"zh-hk\");",
+        "(/English/gi, \"English\").replace(/en-us/gi, \"en-us\");",
+        "d</td>",
+        "AllChar(text, inp) {",
+        "(inp, '');",
+        "AllChar(keyword, charArr[i]);",
+        "(/^\\s+/, '').replace(/\\s+$/, '');"
+      ]
+    }
+  ],
+  "learning_data": {
+    "note": "Results collected for AI learning and model improvement",
+    "purpose": "Compare AI recommendations with actual outcomes",
+    "next_steps": "Analyze accuracy, adjust confidence thresholds, improve prediction models"
+  }
+}

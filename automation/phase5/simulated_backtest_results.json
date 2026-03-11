@@ -1,0 +1,39 @@
+{
+  "backtest_date": "2026-03-11T18:49:04.919813",
+  "total_races": 30,
+  "correct_predictions": 27,
+  "total_predictions": 30,
+  "accuracy": 0.9,
+  "performance_by_barrier": {
+    "4": {
+      "correct": 5,
+      "total": 5
+    },
+    "5": {
+      "correct": 4,
+      "total": 5
+    },
+    "2": {
+      "correct": 5,
+      "total": 6
+    },
+    "3": {
+      "correct": 4,
+      "total": 4
+    },
+    "1": {
+      "correct": 5,
+      "total": 6
+    },
+    "6": {
+      "correct": 4,
+      "total": 4
+    }
+  },
+  "performance_by_jockey": {},
+  "recommendations": [
+    "Current strategy performing well",
+    "Collect more historical data for better validation",
+    "Implement real-time odds analysis"
+  ]
+}

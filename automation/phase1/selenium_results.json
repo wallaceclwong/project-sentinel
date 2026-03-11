@@ -1,0 +1,166 @@
+{
+  "timestamp": "2026-03-11T17:40:58.614049",
+  "page_title": "Race Card - Racing Information - Horse Racing - The Hong Kong Jockey Club",
+  "tables_found": 9,
+  "horses_extracted": 26,
+  "horse_data": [
+    {
+      "number": "1",
+      "name": "11/13/11/14",
+      "barrier": "",
+      "jockey": "KING OF SELECTION"
+    },
+    {
+      "number": "2",
+      "name": "6/12/8/11/5/5",
+      "barrier": "",
+      "jockey": "STELLAR SWIFT"
+    },
+    {
+      "number": "3",
+      "name": "7/10/9/9/12/4",
+      "barrier": "",
+      "jockey": "HARMONY GALAXY"
+    },
+    {
+      "number": "4",
+      "name": "4/1/12/2/4/2",
+      "barrier": "",
+      "jockey": "FORTUNE STAR"
+    },
+    {
+      "number": "5",
+      "name": "2/7/7/4/5/4",
+      "barrier": "",
+      "jockey": "AMAZING AWARD"
+    },
+    {
+      "number": "6",
+      "name": "7/5/9/7/5/8",
+      "barrier": "",
+      "jockey": "THE AZURE"
+    },
+    {
+      "number": "7",
+      "name": "3/8/12/8/11/1",
+      "barrier": "",
+      "jockey": "TO INFINITY"
+    },
+    {
+      "number": "8",
+      "name": "14/12/8/10",
+      "barrier": "",
+      "jockey": "STAR ELEGANCE"
+    },
+    {
+      "number": "9",
+      "name": "9/6/6/3/8/7",
+      "barrier": "",
+      "jockey": "WINNING DATA"
+    },
+    {
+      "number": "10",
+      "name": "9/8/12/11/9/14",
+      "barrier": "",
+      "jockey": "WAVE GARDEN"
+    },
+    {
+      "number": "11",
+      "name": "4/4/10/8/11/14",
+      "barrier": "",
+      "jockey": "GOLDEN BRILLIANT"
+    },
+    {
+      "number": "12",
+      "name": "6/5/4/10/9/5",
+      "barrier": "",
+      "jockey": "DIRIYA"
+    },
+    {
+      "number": "1",
+      "name": "11/13/11/14",
+      "barrier": "",
+      "jockey": "KING OF SELECTION"
+    },
+    {
+      "number": "2",
+      "name": "6/12/8/11/5/5",
+      "barrier": "",
+      "jockey": "STELLAR SWIFT"
+    },
+    {
+      "number": "3",
+      "name": "7/10/9/9/12/4",
+      "barrier": "",
+      "jockey": "HARMONY GALAXY"
+    },
+    {
+      "number": "4",
+      "name": "4/1/12/2/4/2",
+      "barrier": "",
+      "jockey": "FORTUNE STAR"
+    },
+    {
+      "number": "5",
+      "name": "2/7/7/4/5/4",
+      "barrier": "",
+      "jockey": "AMAZING AWARD"
+    },
+    {
+      "number": "6",
+      "name": "7/5/9/7/5/8",
+      "barrier": "",
+      "jockey": "THE AZURE"
+    },
+    {
+      "number": "7",
+      "name": "3/8/12/8/11/1",
+      "barrier": "",
+      "jockey": "TO INFINITY"
+    },
+    {
+      "number": "8",
+      "name": "14/12/8/10",
+      "barrier": "",
+      "jockey": "STAR ELEGANCE"
+    },
+    {
+      "number": "9",
+      "name": "9/6/6/3/8/7",
+      "barrier": "",
+      "jockey": "WINNING DATA"
+    },
+    {
+      "number": "10",
+      "name": "9/8/12/11/9/14",
+      "barrier": "",
+      "jockey": "WAVE GARDEN"
+    },
+    {
+      "number": "11",
+      "name": "4/4/10/8/11/14",
+      "barrier": "",
+      "jockey": "GOLDEN BRILLIANT"
+    },
+    {
+      "number": "12",
+      "name": "6/5/4/10/9/5",
+      "barrier": "",
+      "jockey": "DIRIYA"
+    },
+    {
+      "number": "1",
+      "name": "BLOSSOMY",
+      "barrier": "1059",
+      "jockey": "129"
+    },
+    {
+      "number": "2",
+      "name": "FORTUNE SUPERNOVA",
+      "barrier": "1042",
+      "jockey": "125"
+    }
+  ],
+  "page_source_length": 240170,
+  "success": true
+}

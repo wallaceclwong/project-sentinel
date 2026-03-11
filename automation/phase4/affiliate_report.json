@@ -1,0 +1,65 @@
+{
+  "report_period": "2026-03",
+  "generated_at": "2026-03-11T18:02:15.101706",
+  "summary": {
+    "total_revenue": 1944.73,
+    "total_conversions": 46,
+    "total_referrals": 307,
+    "overall_conversion_rate": 0.1498,
+    "active_partners": 2
+  },
+  "partner_performance": {
+    "betfair": {
+      "status": "active",
+      "monthly_revenue": 186.77,
+      "total_conversions": 5,
+      "total_referrals": 78,
+      "conversion_rate": 0.0641,
+      "commission_rate": 0.3
+    },
+    "william_hill": {
+      "status": "active",
+      "monthly_revenue": 935.24,
+      "total_conversions": 23,
+      "total_referrals": 78,
+      "conversion_rate": 0.2949,
+      "commission_rate": 0.25
+    },
+    "bet365": {
+      "status": "pending",
+      "monthly_revenue": 448.24,
+      "total_conversions": 12,
+      "total_referrals": 71,
+      "conversion_rate": 0.169,
+      "commission_rate": 0.2
+    },
+    "paddy_power": {
+      "status": "pending",
+      "monthly_revenue": 374.48,
+      "total_conversions": 6,
+      "total_referrals": 80,
+      "conversion_rate": 0.075,
+      "commission_rate": 0.25
+    }
+  },
+  "revenue_breakdown": {
+    "signup": 1070.0,
+    "ongoing_revenue": 97.88496837495387,
+    "first_deposit": 776.8459459616502
+  },
+  "conversion_analysis": {
+    "casual": {
+      "count": 31,
+      "revenue": 1140.2026387443552
+    },
+    "standard": {
+      "count": 11,
+      "revenue": 400.9608862819172
+    },
+    "premium": {
+      "count": 4,
+      "revenue": 403.56738931033163
+    }
+  },
+  "recommendations": []
+}
