@@ -1,0 +1,457 @@
+{
+  "racing_jobs": [],
+  "non_racing_jobs": [
+    {
+      "date": "2026/03/01",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/02",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/03",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/04",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/05",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/06",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/07",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/08",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/09",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/10",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/11",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/12",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/13",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/14",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/15",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/16",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/17",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/18",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/19",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/20",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/21",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/22",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/23",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/24",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/25",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/26",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/27",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/28",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/29",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/30",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    },
+    {
+      "date": "2026/03/31",
+      "job_type": "non_racing_tasks",
+      "tasks": [
+        "system_maintenance",
+        "data_backup",
+        "model_optimization",
+        "market_analysis",
+        "strategy_review",
+        "performance_monitoring"
+      ],
+      "priority": "low",
+      "execution_time": "10:00"
+    }
+  ],
+  "maintenance_jobs": [
+    {
+      "date": "2026-03-01",
+      "job_type": "monthly_maintenance",
+      "tasks": [
+        "fetch_monthly_schedule",
+        "update_racing_calendar",
+        "system_health_check",
+        "backup_database",
+        "generate_monthly_report",
+        "optimize_system_performance"
+      ],
+      "priority": "high",
+      "execution_time": "09:00"
+    }
+  ],
+  "learning_jobs": [],
+  "generation_timestamp": "2026-03-11T19:52:58.726094"
+}

@@ -1,0 +1,19 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/project-sentinel-2026/sentinel-scraping-service', '.']
+  
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/project-sentinel-2026/sentinel-scraping-service']
+  
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'sentinel-scraping-service'
+      - '--image=gcr.io/project-sentinel-2026/sentinel-scraping-service'
+      - '--region=asia-east2'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+ 
+images:
+  - 'gcr.io/project-sentinel-2026/sentinel-scraping-service'

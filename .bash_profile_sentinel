@@ -1,0 +1,143 @@
+#!/bin/bash
+# PROJECT SENTINEL - Optimized Shell Profile for Windsurf Remote
+
+# Enhanced prompt with colors and git status
+export PS1='\[\e[32m\]\u@\h\[\e[0m\]:\[\e[34m\]\w\[\e[0m\]$(__git_ps1 " (\[\e[91m\]%s\[\e[0m\])")\$ '
+
+# Environment variables
+export TERM=xterm-256color
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export EDITOR=nano
+export HISTSIZE=10000
+export HISTFILESIZE=20000
+export HISTCONTROL=ignoreboth:erasedups
+export HISTTIMEFORMAT="%F %T "
+
+# Project Sentinel shortcuts
+export SENTINEL_HOME="/home/ubuntu/project-sentinel"
+export SENTINEL_VENV="$SENTINEL_HOME/venv"
+export SENTINEL_LOGS="$SENTINEL_HOME/logs"
+export SENTINEL_DATA="$SENTINEL_HOME/data"
+
+# Useful aliases
+alias ll='ls -alF --color=auto'
+alias la='ls -A --color=auto'
+alias l='ls -CF --color=auto'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# Git aliases
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit -m'
+alias gp='git push'
+alias gl='git pull'
+alias gd='git diff'
+alias gb='git branch'
+alias gco='git checkout'
+
+# Project Sentinel aliases
+alias sentinel='cd $SENTINEL_HOME'
+alias logs='cd $SENTINEL_LOGS && tail -f *.log'
+alias start-sentinel='sudo systemctl start sentinel && sudo systemctl status sentinel'
+alias stop-sentinel='sudo systemctl stop sentinel'
+alias restart-sentinel='sudo systemctl restart sentinel && sudo systemctl status sentinel'
+alias sentinel-status='sudo systemctl status sentinel --no-pager'
+alias venv='source $SENTINEL_VENV/bin/activate'
+alias py='python3'
+alias pip='pip3'
+
+# Development aliases
+alias watch-sentinel='watch -n 5 "sudo systemctl status sentinel --no-pager"'
+alias clean-data='find $SENTINEL_DATA -name "*.zarr" -mtime +1 -exec rm -rf {} + 2>/dev/null || true'
+alias check-disk='df -h | grep -E "(Filesystem|/dev/)"'
+
+# Function to activate virtual environment and change to project directory
+sentinel-dev() {
+    cd $SENTINEL_HOME
+    if [ -d "$SENTINEL_VENV" ]; then
+        source $SENTINEL_VENV/bin/activate
+        echo "✓ Activated virtual environment"
+        echo "✓ Changed to project directory: $SENTINEL_HOME"
+    else
+        echo "✗ Virtual environment not found at $SENTINEL_VENV"
+    fi
+}
+
+# Function to show project status
+sentinel-info() {
+    echo "🚀 PROJECT SENTINEL STATUS"
+    echo "=========================="
+    echo "Project Directory: $SENTINEL_HOME"
+    echo "Virtual Environment: $SENTINEL_VENV"
+    echo "Logs Directory: $SENTINEL_LOGS"
+    echo "Data Directory: $SENTINEL_DATA"
+    echo ""
+    echo "📊 System Status:"
+    sentinel-status
+    echo ""
+    echo "💾 Disk Usage:"
+    check-disk
+    echo ""
+    echo "🌐 Network:"
+    tailscale status | head -5
+}
+
+# Function to quickly test components
+test-sentinel() {
+    echo "🧪 Testing PROJECT SENTINEL Components..."
+    echo ""
+    
+    echo "1. Testing Python environment..."
+    if command -v python3 &> /dev/null; then
+        echo "✓ Python3: $(python3 --version)"
+    else
+        echo "✗ Python3 not found"
+    fi
+    
+    echo "2. Testing virtual environment..."
+    if [ -d "$SENTINEL_VENV" ]; then
+        echo "✓ Virtual environment exists"
+        source $SENTINEL_VENV/bin/activate
+        echo "✓ Pip packages: $(pip list | wc -l) installed"
+    else
+        echo "✗ Virtual environment not found"
+    fi
+    
+    echo "3. Testing Data Watcher..."
+    if [ -f "$SENTINEL_HOME/src/data_watcher.py" ]; then
+        echo "✓ Data Watcher script exists"
+    else
+        echo "✗ Data Watcher script missing"
+    fi
+    
+    echo "4. Testing GCP Bridge..."
+    if [ -f "$SENTINEL_HOME/src/gcp_bridge.py" ]; then
+        echo "✓ GCP Bridge script exists"
+    else
+        echo "✗ GCP Bridge script missing"
+    fi
+    
+    echo "5. Testing Tailscale..."
+    if command -v tailscale &> /dev/null; then
+        echo "✓ Tailscale installed"
+        tailscale status | head -2
+    else
+        echo "✗ Tailscale not found"
+    fi
+}
+
+# Auto-completion for git
+if [ -f /etc/bash_completion.d/git ]; then
+    source /etc/bash_completion.d/git
+fi
+
+# Welcome message
+echo "🚀 PROJECT SENTINEL - Remote Development Environment"
+echo "Type 'sentinel-info' for status, 'sentinel-dev' to start development"
+echo "Type 'test-sentinel' to run component tests"
+
+# Auto-change to project directory
+cd $SENTINEL_HOME 2>/dev/null || echo "Project directory not found: $SENTINEL_HOME"

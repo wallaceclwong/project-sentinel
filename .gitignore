@@ -1,0 +1,68 @@
+# PROJECT SENTINEL - Git Ignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# Data Lake (too large for git)
+data/
+*.zarr/
+*.nc/
+*.csv
+
+# Configuration with secrets
+.env
+config/secrets.yaml
+*.key
+*.pem
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cloud Run
+cloud_run/.dockerignore
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# API Keys and Credentials
+setup_gcp_credentials.md
+deploy_cloud_run.sh
+deploy_cloud_run_with_key.sh
+sentinel_usage_report_*.json

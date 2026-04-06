@@ -1,0 +1,72 @@
+{
+  "performance_summary": {
+    "initial_bankroll": 1000.0,
+    "current_bankroll": 1000.0,
+    "peak_bankroll": 1000.0,
+    "trough_bankroll": 1000.0,
+    "total_profit": 0.0,
+    "total_staked": 10.0,
+    "total_returns": 10.0,
+    "roi": 0.0,
+    "win_rate": 100.0,
+    "max_drawdown": 0.0,
+    "total_bets": 1,
+    "winning_bets": 1,
+    "losing_bets": 0,
+    "pending_bets": 0,
+    "current_exposure": 0.0,
+    "current_streak": "1W",
+    "daily_pnl": 0.0,
+    "risk_params": {
+      "max_stake_per_race": 0.02,
+      "max_stake_per_day": 0.1,
+      "max_total_exposure": 0.2,
+      "stop_loss_daily": 0.1,
+      "profit_target_daily": 0.15,
+      "min_confidence": 75.0,
+      "kelly_fraction": 0.25,
+      "max_consecutive_losses": 5
+    },
+    "timestamp": "2026-03-11T17:49:29.260205"
+  },
+  "betting_history": [
+    {
+      "bet_id": "bet_1773222569",
+      "timestamp": "2026-03-11T17:49:29.259980",
+      "race_id": "HK_HV_2026-03-11_R3",
+      "horse_name": "TO INFINITY",
+      "stake": 10.0,
+      "odds": 4.0,
+      "confidence": 85.0,
+      "type": "PLACE",
+      "status": "WON",
+      "potential_return": 10.0,
+      "potential_loss": 10.0,
+      "bankroll_before": 1000.0,
+      "returns": 10.0,
+      "profit": 0.0,
+      "finishing_position": 2
+    }
+  ],
+  "daily_results": {
+    "2026-03-11": {
+      "bets": 1,
+      "wins": 1,
+      "losses": 0,
+      "staked": 10.0,
+      "returns": 10.0,
+      "profit": 0.0
+    }
+  },
+  "risk_parameters": {
+    "max_stake_per_race": 0.02,
+    "max_stake_per_day": 0.1,
+    "max_total_exposure": 0.2,
+    "stop_loss_daily": 0.1,
+    "profit_target_daily": 0.15,
+    "min_confidence": 75.0,
+    "kelly_fraction": 0.25,
+    "max_consecutive_losses": 5
+  },
+  "export_timestamp": "2026-03-11T17:49:29.260213"
+}

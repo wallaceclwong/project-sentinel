@@ -1,0 +1,57 @@
+# PROJECT SENTINEL - Configuration
+# Phase 2: Weather Data Ingestion Engine
+
+data_lake:
+  path: "/home/ubuntu/project-sentinel/data"
+  retention_hours: 24
+  
+weather_api:
+  base_url: "https://weathernext-api.com"
+  ensemble_members: 64
+  update_interval_minutes: 60
+  
+dask:
+  workers: 2
+  threads_per_worker: 1
+  memory_limit: "800MB"
+  dashboard_port: 8787
+  
+logging:
+  level: "INFO"
+  file: "/home/ubuntu/project-sentinel/logs/data_watcher.log"
+  max_size_mb: 100
+  backup_count: 5
+  
+gcp_bridge:
+  cloud_run_url: "https://sentinel-reasoning-895191182806.asia-east2.run.app"
+  timeout_seconds: 30
+  
+gemini_pro:
+  api_key: "${GEMINI_API_KEY}"
+  model: "gemini-2.5-pro"
+  temperature: 0.7
+  max_tokens: 2048
+  
+telegram:
+  bot_token: "${TELEGRAM_BOT_TOKEN}"
+  chat_id: "${TELEGRAM_CHAT_ID}"
+
+# Phase 4: Trading & Execution
+trading:
+  paper_trading: true
+  require_2fa: true
+  
+polymarket:
+  api_key: "${POLYMARKET_API_KEY}"
+  api_secret: "${POLYMARKET_API_SECRET}"
+  clob_url: "https://clob.polymarket.com"
+  gamma_url: "https://gamma-api.polymarket.com"
+
+risk_management:
+  max_position_size: 500
+  max_daily_loss: 100
+  max_total_exposure: 2000
+  max_trades_per_day: 20
+  min_confidence: 0.60
+  max_spread_pct: 5.0
+  circuit_breaker_cooldown_seconds: 3600
