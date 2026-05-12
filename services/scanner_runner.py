@@ -140,9 +140,19 @@ def _footer(scanned, no_market, low_liq, signals):
 
 def _print_signal_row(market: MarketInfo, forecast: DailyForecast, signal: TradeSignal):
     flag = ">>" if signal.action != "SKIP" else "  "
+    
+    if market.bracket_type == "below":
+        thresh_str = f"<={market.temp_high_c:.1f}C"
+    elif market.bracket_type == "above":
+        thresh_str = f">={market.temp_low_c:.1f}C"
+    elif market.bracket_type == "exact":
+        thresh_str = f"=={(market.temp_low_c + market.temp_high_c)/2:.1f}C"
+    else:
+        thresh_str = f"[{market.temp_low_c:.1f}, {market.temp_high_c:.1f})C"
+
     print(
         f"  {flag} {market.city:<14} "
-        f"thresh={market.temp_threshold_c:>5.1f}C  "
+        f"thresh={thresh_str:>10}  "
         f"ours={signal.our_probability:>6.1%}  "
         f"mkt={signal.market_probability:>6.1%}  "
         f"edge={signal.edge_pct:>5.1f}%  "

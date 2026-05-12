@@ -35,6 +35,12 @@ CITY_COORDS: dict[str, dict] = {
     "amsterdam":  {"lat": 52.3676,  "lng":  4.9041,  "display": "Amsterdam"},
     "istanbul":   {"lat": 41.0082,  "lng": 28.9784,  "display": "Istanbul"},
     "bangkok":    {"lat": 13.7563,  "lng": 100.5018, "display": "Bangkok"},
+    "sao paulo":  {"lat":-23.5505,  "lng": -46.6333, "display": "Sao Paulo"},
+    "buenos aires":{"lat":-34.6037, "lng": -58.3816, "display": "Buenos Aires"},
+    "toronto":    {"lat": 43.6510,  "lng": -79.3470, "display": "Toronto"},
+    "seattle":    {"lat": 47.6062,  "lng":-122.3321, "display": "Seattle"},
+    "dallas":     {"lat": 32.7767,  "lng": -96.7970, "display": "Dallas"},
+    "nyc":        {"lat": 40.7128,  "lng": -74.0060, "display": "NYC"},
 }
 
 
@@ -45,7 +51,9 @@ class MarketInfo:
     question: str
     city: str
     city_key: str                  # lowercase key for CITY_COORDS lookup
-    temp_threshold_c: float        # The threshold the market is asking about
+    bracket_type: str              # "below", "exact", "range", "above"
+    temp_low_c: float              # lower bound
+    temp_high_c: float             # upper bound
     yes_token_id: str
     no_token_id: str
     yes_price: float               # Current market price (= implied probability)
@@ -70,14 +78,9 @@ class TradeSignal:
 
 class MarketScanner:
     """
-    Discovers and scans Polymarket temperature markets.
-    Supports both direct slug lookup and broad auto-discovery.
+    Discovers and scans Polymarket temperature markets using the events API.
     """
     GAMMA_URL = "https://gamma-api.polymarket.com"
-    CLOB_URL  = "https://clob.polymarket.com"
-
-    # Search terms that reliably surface temp markets (not sports teams)
-    _DISCOVERY_QUERIES = ["highest temp", "highest temperature", "max temp"]
 
     def __init__(self, min_edge_pct: float = 10.0, request_delay: float = 0.3):
         self.min_edge_pct  = min_edge_pct
@@ -89,27 +92,31 @@ class MarketScanner:
     async def discover_temp_markets(self) -> list[MarketInfo]:
         """
         Auto-discover all currently active temperature/highest-temp markets
-        on Polymarket, regardless of slug. Returns only markets we can
-        match to a known city with coordinates.
+        on Polymarket by querying events with tag_slug=temperature.
         """
-        seen_ids: set[str] = set()
         raw_markets: list[dict] = []
 
-        for query in self._DISCOVERY_QUERIES:
-            await asyncio.sleep(self.request_delay)
-            try:
-                resp = await self._client.get(
-                    f"{self.GAMMA_URL}/markets",
-                    params={"active": "true", "closed": "false",
-                            "limit": 100, "search": query}
-                )
-                resp.raise_for_status()
-                for m in resp.json():
-                    if m["id"] not in seen_ids:
-                        seen_ids.add(m["id"])
-                        raw_markets.append(m)
-            except Exception as e:
-                logger.warning(f"Discovery query '{query}' failed: {e}")
+        await asyncio.sleep(self.request_delay)
+        try:
+            resp = await self._client.get(
+                f"{self.GAMMA_URL}/events",
+                params={"tag_slug": "temperature", "active": "true", "closed": "false", "limit": 100}
+            )
+            resp.raise_for_status()
+            events = resp.json()
+            for event in events:
+                for m in event.get("markets", []):
+                    # Filter out closed/archived markets and resolved prices
+                    if not m.get("closed") and not m.get("archived"):
+                        prices = m.get("outcomePrices", "[]")
+                        try:
+                            p = eval(prices)
+                            if float(p[0]) not in (0.0, 1.0):
+                                raw_markets.append(m)
+                        except Exception:
+                            pass
+        except Exception as e:
+            logger.warning(f"Discovery query failed: {e}")
 
         logger.info(f"Discovery: found {len(raw_markets)} candidate markets")
 
@@ -152,17 +159,16 @@ class MarketScanner:
         """
         question = m.get("question", "")
 
-        # Must have a parseable temperature threshold
-        threshold = self._parse_threshold(question)
-        if threshold is None:
+        bracket_info = self._parse_bracket(question)
+        if not bracket_info:
             return None
 
-        # Must match a known city
+        bracket_type, temp_low_c, temp_high_c = bracket_info
+
         city_key, city_display = self._extract_city(question, m.get("slug", ""))
         if city_key is None:
             return None
 
-        # Parse prices and token IDs (stored as JSON strings in Gamma API)
         try:
             prices    = [float(p) for p in eval(m.get("outcomePrices", "[0.5, 0.5]"))]
             token_ids = eval(m.get("clobTokenIds", "['', '']"))
@@ -176,7 +182,9 @@ class MarketScanner:
             question       = question,
             city           = city_display,
             city_key       = city_key,
-            temp_threshold_c = threshold,
+            bracket_type   = bracket_type,
+            temp_low_c     = temp_low_c,
+            temp_high_c    = temp_high_c,
             yes_token_id   = token_ids[0] if token_ids else "",
             no_token_id    = token_ids[1] if len(token_ids) > 1 else "",
             yes_price      = prices[0],
@@ -184,20 +192,46 @@ class MarketScanner:
             slug           = m.get("slug", ""),
         )
 
-    def _parse_threshold(self, question: str) -> Optional[float]:
+    def _parse_bracket(self, question: str) -> Optional[tuple[str, float, float]]:
         """
-        Extract temperature threshold from question text.
-          "Highest temp in London at least 18°C?" → 18.0
-          "Max temp Seoul 65°F or higher?"        → 18.3
+        Parse bracket markets for their temperature bounds in Celsius.
+        Returns (bracket_type, low_c, high_c)
         """
-        # Celsius: "18°C", "18 C", "18C"
-        m = re.search(r'(\d+(?:\.\d+)?)\s*°?\s*C\b', question, re.IGNORECASE)
-        if m:
-            return float(m.group(1))
-        # Fahrenheit → convert
-        m = re.search(r'(\d+(?:\.\d+)?)\s*°?\s*F\b', question, re.IGNORECASE)
-        if m:
-            return round((float(m.group(1)) - 32) * 5 / 9, 1)
+        q = question.lower()
+        
+        # 1. "or below" (e.g. "9°C or below")
+        m_below = re.search(r'(\d+(?:\.\d+)?)\s*°?\s*([cf])\s+or\s+below', q)
+        if m_below:
+            val, unit = float(m_below.group(1)), m_below.group(2)
+            c_val = val if unit == 'c' else (val - 32) * 5/9
+            offset = 0.5 if unit == 'c' else (0.5 * 5/9)
+            return ("below", -999.0, round(c_val + offset, 2))
+
+        # 2. "or higher" / "or above"
+        m_above = re.search(r'(\d+(?:\.\d+)?)\s*°?\s*([cf])\s+or\s+(?:higher|above)', q)
+        if m_above:
+            val, unit = float(m_above.group(1)), m_above.group(2)
+            c_val = val if unit == 'c' else (val - 32) * 5/9
+            offset = 0.5 if unit == 'c' else (0.5 * 5/9)
+            return ("above", round(c_val - offset, 2), 999.0)
+
+        # 3. "between X-Y" (e.g. "between 44-45°F")
+        m_between = re.search(r'between\s+(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)\s*°?\s*([cf])', q)
+        if m_between:
+            low, high, unit = float(m_between.group(1)), float(m_between.group(2)), m_between.group(3)
+            low_c = low if unit == 'c' else (low - 32) * 5/9
+            high_c = high if unit == 'c' else (high - 32) * 5/9
+            offset = 0.5 if unit == 'c' else (0.5 * 5/9)
+            return ("range", round(low_c - offset, 2), round(high_c + offset, 2))
+
+        # 4. exact "be 10°C"
+        m_exact = re.search(r'be\s+(\d+(?:\.\d+)?)\s*°?\s*([cf])', q)
+        if m_exact:
+            val, unit = float(m_exact.group(1)), m_exact.group(2)
+            c_val = val if unit == 'c' else (val - 32) * 5/9
+            offset = 0.5 if unit == 'c' else (0.5 * 5/9)
+            return ("exact", round(c_val - offset, 2), round(c_val + offset, 2))
+
         return None
 
     def _extract_city(self, question: str, slug: str) -> tuple[Optional[str], str]:
@@ -221,12 +255,20 @@ class MarketScanner:
     ) -> TradeSignal:
         """
         Core signal logic:
-          - Compute P(max_temp > threshold) from WeatherNext 2 forecast
+          - Compute P(bracket) from WeatherNext 2 forecast
           - Compare to market YES price
           - If |edge| > threshold → BUY_YES or BUY_NO
         """
         min_edge  = min_edge_pct or self.min_edge_pct
-        our_prob  = forecast.prob_exceeds(market.temp_threshold_c)
+        
+        # Calculate our probability based on the bracket type
+        if market.bracket_type == "below":
+            our_prob = forecast.prob_at_or_below(market.temp_high_c)
+        elif market.bracket_type == "above":
+            our_prob = forecast.prob_exceeds(market.temp_low_c)
+        else: # "exact" or "range"
+            our_prob = forecast.prob_in_bracket(market.temp_low_c, market.temp_high_c)
+            
         mkt_prob  = market.yes_price
         edge_pct  = abs(our_prob - mkt_prob) * 100
 
