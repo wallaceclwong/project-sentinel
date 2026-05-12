@@ -6,9 +6,26 @@ data_lake:
   retention_hours: 24
   
 weather_api:
-  base_url: "https://weathernext-api.com"
-  ensemble_members: 64
-  update_interval_minutes: 60
+  base_url: "https://weather.googleapis.com/v1"
+  api_key: "${GMAPS_API_KEY}"
+  update_interval_minutes: 15
+  target_markets:
+    - slug: "highest-temp-london"
+      city: "London"
+      lat: 51.5074
+      lng: -0.1278
+    - slug: "highest-temp-singapore"
+      city: "Singapore"
+      lat: 1.3521
+      lng: 103.8198
+    - slug: "highest-temp-seoul"
+      city: "Seoul"
+      lat: 37.5665
+      lng: 126.9780
+    - slug: "highest-temp-shanghai"
+      city: "Shanghai"
+      lat: 31.2304
+      lng: 121.4737
   
 dask:
   workers: 2
@@ -38,8 +55,10 @@ telegram:
 
 # Phase 4: Trading & Execution
 trading:
-  paper_trading: true
+  paper_trading: true        # set to false for live trading
   require_2fa: true
+  min_edge_pct: 10.0          # only trade if our prob differs from market by >10%
+  max_position_usdc: 20.0    # max $20 per trade
   
 polymarket:
   api_key: "${POLYMARKET_API_KEY}"

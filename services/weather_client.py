@@ -21,23 +21,31 @@ class DailyForecast:
     precip_prob: float               # probability of precipitation 0–1
     fetched_at: datetime = None
 
-    def prob_exceeds(self, threshold_c: float) -> float:
-        """
-        Compute P(max_temp > threshold) using a simple Gaussian approximation
-        over the forecast uncertainty range [low_temp, high_temp].
-        This is our core trading signal.
-        """
+    def _cdf(self, x: float) -> float:
+        """P(max_temp <= x) — internal Gaussian CDF."""
         import math
-        mean = self.forecast_max_temp_c
-        # Estimate std dev from the forecast range (assumes 90% confidence interval)
+        mean  = self.forecast_max_temp_c
         sigma = (self.high_temp_c - self.low_temp_c) / (2 * 1.645)
         if sigma <= 0:
-            return 1.0 if mean > threshold_c else 0.0
+            return 0.0 if mean > x else 1.0
+        z = (x - mean) / (sigma * math.sqrt(2))
+        return 0.5 * (1 + math.erf(z))
 
-        # Compute CDF using error function
-        z = (threshold_c - mean) / (sigma * math.sqrt(2))
-        p_below = 0.5 * (1 + math.erf(z))
-        return round(1.0 - p_below, 4)
+    def prob_exceeds(self, threshold_c: float) -> float:
+        """P(max_temp > threshold) — for simple YES/NO markets."""
+        return round(1.0 - self._cdf(threshold_c), 4)
+
+    def prob_at_or_below(self, threshold_c: float) -> float:
+        """P(max_temp <= threshold) — for lower-bound bracket markets."""
+        return round(self._cdf(threshold_c), 4)
+
+    def prob_in_bracket(self, low_c: float, high_c: float) -> float:
+        """
+        P(low_c <= max_temp < high_c) — for exact / range bracket markets.
+        Each 1°C Polymarket bucket is treated as a half-open interval.
+        E.g. bracket '10°C' → low=9.5, high=10.5
+        """
+        return round(max(0.0, self._cdf(high_c) - self._cdf(low_c)), 4)
 
 
 class WeatherClient:
