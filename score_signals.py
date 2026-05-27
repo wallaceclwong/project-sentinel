@@ -9,7 +9,11 @@ Usage:
 """
 import argparse
 import json
+import sys
+import io
 from collections import defaultdict
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 from pathlib import Path
 
 SIGNALS_PATH = Path("data/signals.jsonl")

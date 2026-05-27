@@ -376,12 +376,15 @@ class MarketScanner:
             )
 
         if our_prob > mkt_prob:
-            action   = "BUY_YES"
-            token_id = market.yes_token_id
-            price    = min(mkt_prob + 0.01, 0.97)
+            # NO-ONLY strategy: SKIP YES signals.
+            # Backtest proved YES bets lose (8% hit rate, -$16 P&L).
+            # NO bets win at 71% hit rate (+$13 P&L).
+            action   = "SKIP"
+            token_id = ""
+            price    = 0.0
             reason   = (
-                f"Our P={our_prob:.1%} vs market P={mkt_prob:.1%}. "
-                f"Market UNDERPRICES YES by {edge_pct:.1f}%."
+                f"NO-ONLY: SKIP YES signal (our={our_prob:.1%} > mkt={mkt_prob:.1%}). "
+                f"Edge={edge_pct:.1f}%."
             )
         else:
             action   = "BUY_NO"

@@ -14,6 +14,7 @@ trading:
   paper_trading: true          # set to false for live trading
   require_2fa: true
   min_edge_pct: 25.0           # only trade if our prob differs from market by >25%
+  no_only: true                # NO-only strategy: skip BUY_YES (backtest: YES=8% hit, NO=71% hit)
   max_position_usdc: 20.0      # max $20 per trade
 
 polymarket:
