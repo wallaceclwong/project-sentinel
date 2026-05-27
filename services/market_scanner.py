@@ -4,6 +4,7 @@ Scans target markets, fetches current YES prices, compares vs our weather foreca
 Generates TradeSignals when edge exceeds threshold.
 """
 import asyncio
+import json
 import re
 from dataclasses import dataclass
 from typing import Optional
@@ -11,36 +12,54 @@ import httpx
 from loguru import logger
 
 from services.weather_client import DailyForecast
+from services.ensemble_client import EnsembleForecast
 
 
 # ── Known city → lat/lng mapping ────────────────────────────────────────────
 CITY_COORDS: dict[str, dict] = {
-    "london":     {"lat": 51.5074,  "lng": -0.1278,  "display": "London"},
-    "singapore":  {"lat":  1.3521,  "lng": 103.8198, "display": "Singapore"},
-    "seoul":      {"lat": 37.5665,  "lng": 126.9780, "display": "Seoul"},
-    "shanghai":   {"lat": 31.2304,  "lng": 121.4737, "display": "Shanghai"},
-    "paris":      {"lat": 48.8566,  "lng":  2.3522,  "display": "Paris"},
-    "tel aviv":   {"lat": 32.0853,  "lng": 34.7818,  "display": "Tel Aviv"},
-    "tel-aviv":   {"lat": 32.0853,  "lng": 34.7818,  "display": "Tel Aviv"},
-    "atlanta":    {"lat": 33.7490,  "lng": -84.3880, "display": "Atlanta"},
-    "wellington": {"lat":-41.2866,  "lng": 174.7756, "display": "Wellington"},
-    "tokyo":      {"lat": 35.6762,  "lng": 139.6503, "display": "Tokyo"},
-    "new york":   {"lat": 40.7128,  "lng": -74.0060, "display": "New York"},
-    "los angeles":{"lat": 34.0522,  "lng":-118.2437, "display": "Los Angeles"},
-    "miami":      {"lat": 25.7617,  "lng": -80.1918, "display": "Miami"},
-    "chicago":    {"lat": 41.8781,  "lng": -87.6298, "display": "Chicago"},
-    "sydney":     {"lat":-33.8688,  "lng": 151.2093, "display": "Sydney"},
-    "dubai":      {"lat": 25.2048,  "lng": 55.2708,  "display": "Dubai"},
-    "berlin":     {"lat": 52.5200,  "lng": 13.4050,  "display": "Berlin"},
-    "amsterdam":  {"lat": 52.3676,  "lng":  4.9041,  "display": "Amsterdam"},
-    "istanbul":   {"lat": 41.0082,  "lng": 28.9784,  "display": "Istanbul"},
-    "bangkok":    {"lat": 13.7563,  "lng": 100.5018, "display": "Bangkok"},
-    "sao paulo":  {"lat":-23.5505,  "lng": -46.6333, "display": "Sao Paulo"},
-    "buenos aires":{"lat":-34.6037, "lng": -58.3816, "display": "Buenos Aires"},
-    "toronto":    {"lat": 43.6510,  "lng": -79.3470, "display": "Toronto"},
-    "seattle":    {"lat": 47.6062,  "lng":-122.3321, "display": "Seattle"},
-    "dallas":     {"lat": 32.7767,  "lng": -96.7970, "display": "Dallas"},
-    "nyc":        {"lat": 40.7128,  "lng": -74.0060, "display": "NYC"},
+    # Asia
+    "tokyo":        {"lat": 35.6762,  "lng": 139.6503,  "display": "Tokyo"},
+    "seoul":        {"lat": 37.5665,  "lng": 126.9780,  "display": "Seoul"},
+    "busan":        {"lat": 35.1796,  "lng": 129.0756,  "display": "Busan"},
+    "shanghai":     {"lat": 31.2304,  "lng": 121.4737,  "display": "Shanghai"},
+    "beijing":      {"lat": 39.9042,  "lng": 116.4074,  "display": "Beijing"},
+    "chongqing":    {"lat": 29.4316,  "lng": 106.9123,  "display": "Chongqing"},
+    "chengdu":      {"lat": 30.5728,  "lng": 104.0668,  "display": "Chengdu"},
+    "wuhan":        {"lat": 30.5928,  "lng": 114.3055,  "display": "Wuhan"},
+    "shenzhen":     {"lat": 22.5431,  "lng": 114.0579,  "display": "Shenzhen"},
+    "qingdao":      {"lat": 36.0671,  "lng": 120.3826,  "display": "Qingdao"},
+    "hong kong":    {"lat": 22.3193,  "lng": 114.1694,  "display": "Hong Kong"},
+    "singapore":    {"lat":  1.3521,  "lng": 103.8198,  "display": "Singapore"},
+    "bangkok":      {"lat": 13.7563,  "lng": 100.5018,  "display": "Bangkok"},
+    "jakarta":      {"lat": -6.2088,  "lng": 106.8456,  "display": "Jakarta"},
+    "dubai":        {"lat": 25.2048,  "lng": 55.2708,   "display": "Dubai"},
+    "tel aviv":     {"lat": 32.0853,  "lng": 34.7818,   "display": "Tel Aviv"},
+    "tel-aviv":     {"lat": 32.0853,  "lng": 34.7818,   "display": "Tel Aviv"},
+    # Europe
+    "london":       {"lat": 51.5074,  "lng": -0.1278,   "display": "London"},
+    "paris":        {"lat": 48.8566,  "lng":  2.3522,   "display": "Paris"},
+    "berlin":       {"lat": 52.5200,  "lng": 13.4050,   "display": "Berlin"},
+    "amsterdam":    {"lat": 52.3676,  "lng":  4.9041,   "display": "Amsterdam"},
+    "milan":        {"lat": 45.4642,  "lng":  9.1900,   "display": "Milan"},
+    "warsaw":       {"lat": 52.2297,  "lng": 21.0122,   "display": "Warsaw"},
+    "istanbul":     {"lat": 41.0082,  "lng": 28.9784,   "display": "Istanbul"},
+    # Americas
+    "new york":     {"lat": 40.7128,  "lng": -74.0060,  "display": "New York"},
+    "nyc":          {"lat": 40.7128,  "lng": -74.0060,  "display": "NYC"},
+    "los angeles":  {"lat": 34.0522,  "lng":-118.2437,  "display": "Los Angeles"},
+    "chicago":      {"lat": 41.8781,  "lng": -87.6298,  "display": "Chicago"},
+    "miami":        {"lat": 25.7617,  "lng": -80.1918,  "display": "Miami"},
+    "atlanta":      {"lat": 33.7490,  "lng": -84.3880,  "display": "Atlanta"},
+    "denver":       {"lat": 39.7392,  "lng":-104.9903,  "display": "Denver"},
+    "austin":       {"lat": 30.2672,  "lng": -97.7431,  "display": "Austin"},
+    "dallas":       {"lat": 32.7767,  "lng": -96.7970,  "display": "Dallas"},
+    "seattle":      {"lat": 47.6062,  "lng":-122.3321,  "display": "Seattle"},
+    "toronto":      {"lat": 43.6510,  "lng": -79.3470,  "display": "Toronto"},
+    "sao paulo":    {"lat":-23.5505,  "lng": -46.6333,  "display": "Sao Paulo"},
+    "buenos aires": {"lat":-34.6037,  "lng": -58.3816,  "display": "Buenos Aires"},
+    # Oceania
+    "sydney":       {"lat":-33.8688,  "lng": 151.2093,  "display": "Sydney"},
+    "wellington":   {"lat":-41.2866,  "lng": 174.7756,  "display": "Wellington"},
 }
 
 
@@ -59,6 +78,7 @@ class MarketInfo:
     yes_price: float               # Current market price (= implied probability)
     liquidity: float               # Total liquidity in USDC
     slug: str = ""
+    temp_type: str = "highest"     # "highest" or "lowest"
 
 
 @dataclass
@@ -74,6 +94,10 @@ class TradeSignal:
     token_id: str
     price: float
     reason: str
+    google_prob: Optional[float] = None
+    ensemble_prob: Optional[float] = None
+    temp_low_c: float = 0.0
+    temp_high_c: float = 0.0
 
 
 class MarketScanner:
@@ -81,6 +105,7 @@ class MarketScanner:
     Discovers and scans Polymarket temperature markets using the events API.
     """
     GAMMA_URL = "https://gamma-api.polymarket.com"
+    CITY_COORDS = CITY_COORDS
 
     def __init__(self, min_edge_pct: float = 10.0, request_delay: float = 0.3):
         self.min_edge_pct  = min_edge_pct
@@ -91,32 +116,49 @@ class MarketScanner:
 
     async def discover_temp_markets(self) -> list[MarketInfo]:
         """
-        Auto-discover all currently active temperature/highest-temp markets
-        on Polymarket by querying events with tag_slug=temperature.
+        Auto-discover all currently active temperature markets on Polymarket.
+        Queries multiple tag slugs and paginates to capture all open markets.
         """
         raw_markets: list[dict] = []
+        seen_ids: set[str] = set()
 
-        await asyncio.sleep(self.request_delay)
-        try:
-            resp = await self._client.get(
-                f"{self.GAMMA_URL}/events",
-                params={"tag_slug": "temperature", "active": "true", "closed": "false", "limit": 100}
-            )
-            resp.raise_for_status()
-            events = resp.json()
-            for event in events:
-                for m in event.get("markets", []):
-                    # Filter out closed/archived markets and resolved prices
-                    if not m.get("closed") and not m.get("archived"):
-                        prices = m.get("outcomePrices", "[]")
-                        try:
-                            p = eval(prices)
-                            if float(p[0]) not in (0.0, 1.0):
-                                raw_markets.append(m)
-                        except Exception:
-                            pass
-        except Exception as e:
-            logger.warning(f"Discovery query failed: {e}")
+        tag_slugs = ["daily-temperature", "temperature"]
+
+        for tag in tag_slugs:
+            offset = 0
+            while True:
+                await asyncio.sleep(self.request_delay)
+                try:
+                    resp = await self._client.get(
+                        f"{self.GAMMA_URL}/events",
+                        params={"tag_slug": tag, "active": "true", "closed": "false",
+                                "limit": 100, "offset": offset}
+                    )
+                    resp.raise_for_status()
+                    events = resp.json()
+                    if not events:
+                        break
+                    for event in events:
+                        for m in event.get("markets", []):
+                            mid = m.get("id", "")
+                            if mid in seen_ids:
+                                continue
+                            seen_ids.add(mid)
+                            if not m.get("closed") and not m.get("archived"):
+                                prices = m.get("outcomePrices", "[]")
+                                try:
+                                    p = json.loads(prices) if isinstance(prices, str) else prices
+                                    yes_price = float(p[0])
+                                    if 0.02 < yes_price < 0.98:
+                                        raw_markets.append(m)
+                                except Exception:
+                                    pass
+                    offset += 100
+                    if len(events) < 100:
+                        break
+                except Exception as e:
+                    logger.warning(f"Discovery query failed (tag={tag}, offset={offset}): {e}")
+                    break
 
         logger.info(f"Discovery: found {len(raw_markets)} candidate markets")
 
@@ -170,11 +212,16 @@ class MarketScanner:
             return None
 
         try:
-            prices    = [float(p) for p in eval(m.get("outcomePrices", "[0.5, 0.5]"))]
-            token_ids = eval(m.get("clobTokenIds", "['', '']"))
+            raw_prices = m.get("outcomePrices", "[0.5, 0.5]")
+            prices    = [float(p) for p in (json.loads(raw_prices) if isinstance(raw_prices, str) else raw_prices)]
+            raw_tokens = m.get("clobTokenIds", '["" ,""]')
+            token_ids = json.loads(raw_tokens) if isinstance(raw_tokens, str) else raw_tokens
         except Exception:
             prices    = [0.5, 0.5]
             token_ids = ["", ""]
+
+        # Detect highest vs lowest temperature
+        temp_type = "lowest" if "lowest temperature" in question.lower() else "highest"
 
         return MarketInfo(
             market_id      = m["id"],
@@ -190,6 +237,7 @@ class MarketScanner:
             yes_price      = prices[0],
             liquidity      = float(m.get("liquidity", 0)),
             slug           = m.get("slug", ""),
+            temp_type      = temp_type,
         )
 
     def _parse_bracket(self, question: str) -> Optional[tuple[str, float, float]]:
@@ -252,23 +300,61 @@ class MarketScanner:
         market: MarketInfo,
         forecast: DailyForecast,
         min_edge_pct: Optional[float] = None,
+        ensemble_forecast: Optional[EnsembleForecast] = None,
+        ensemble_weight: float = 0.5,
     ) -> TradeSignal:
         """
         Core signal logic:
-          - Compute P(bracket) from WeatherNext 2 forecast
+          - Compute P(bracket) from WeatherNext 2 forecast (Gaussian CDF)
+          - Optionally blend with Open-Meteo ensemble (member counting)
           - Compare to market YES price
           - If |edge| > threshold → BUY_YES or BUY_NO
         """
         min_edge  = min_edge_pct or self.min_edge_pct
         
-        # Calculate our probability based on the bracket type
-        if market.bracket_type == "below":
-            our_prob = forecast.prob_at_or_below(market.temp_high_c)
-        elif market.bracket_type == "above":
-            our_prob = forecast.prob_exceeds(market.temp_low_c)
-        else: # "exact" or "range"
-            our_prob = forecast.prob_in_bracket(market.temp_low_c, market.temp_high_c)
-            
+        # Google Weather probability (Gaussian CDF)
+        if market.temp_type == "lowest":
+            if forecast.forecast_min_temp_c is None:
+                google_prob = 0.5
+            elif market.bracket_type == "below":
+                google_prob = forecast.prob_min_at_or_below(market.temp_high_c)
+            elif market.bracket_type == "above":
+                google_prob = forecast.prob_min_exceeds(market.temp_low_c)
+            else:
+                google_prob = forecast.prob_min_in_bracket(market.temp_low_c, market.temp_high_c)
+        else:
+            if market.bracket_type == "below":
+                google_prob = forecast.prob_at_or_below(market.temp_high_c)
+            elif market.bracket_type == "above":
+                google_prob = forecast.prob_exceeds(market.temp_low_c)
+            else:
+                google_prob = forecast.prob_in_bracket(market.temp_low_c, market.temp_high_c)
+
+        # Ensemble probability (member counting)
+        ens_prob = None
+        if ensemble_forecast is not None:
+            if market.temp_type == "lowest":
+                if market.bracket_type == "below":
+                    ens_prob = ensemble_forecast.prob_min_at_or_below(market.temp_high_c)
+                elif market.bracket_type == "above":
+                    ens_prob = ensemble_forecast.prob_min_exceeds(market.temp_low_c)
+                else:
+                    ens_prob = ensemble_forecast.prob_min_in_bracket(market.temp_low_c, market.temp_high_c)
+            else:
+                if market.bracket_type == "below":
+                    ens_prob = ensemble_forecast.prob_max_at_or_below(market.temp_high_c)
+                elif market.bracket_type == "above":
+                    ens_prob = ensemble_forecast.prob_max_exceeds(market.temp_low_c)
+                else:
+                    ens_prob = ensemble_forecast.prob_max_in_bracket(market.temp_low_c, market.temp_high_c)
+
+        # Blend: weighted average of Google + Ensemble
+        if ens_prob is not None:
+            w = ensemble_weight
+            our_prob = round((1 - w) * google_prob + w * ens_prob, 4)
+        else:
+            our_prob = google_prob
+
         mkt_prob  = market.yes_price
         edge_pct  = abs(our_prob - mkt_prob) * 100
 
@@ -285,6 +371,8 @@ class MarketScanner:
                 token_id         = "",
                 price            = 0.0,
                 reason           = f"Edge {edge_pct:.1f}% < minimum {min_edge:.0f}%",
+                google_prob      = google_prob,
+                ensemble_prob    = ens_prob,
             )
 
         if our_prob > mkt_prob:
@@ -319,6 +407,10 @@ class MarketScanner:
             token_id         = token_id,
             price            = price,
             reason           = reason,
+            google_prob      = google_prob,
+            ensemble_prob    = ens_prob,
+            temp_low_c       = market.temp_low_c,
+            temp_high_c      = market.temp_high_c,
         )
 
     async def close(self):

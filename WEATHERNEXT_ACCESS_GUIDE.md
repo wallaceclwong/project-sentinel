@@ -40,45 +40,12 @@ tokyo_forecasts = weathernext2.filterBounds(tokyo)
 ensemble_data = tokyo_forecasts.select('temperature_ensemble').getInfo()
 ```
 
-## 🚀 Alternative Path: Vertex AI (Paid)
-
-### Step 1: Apply for Early Access
-**URL**: https://docs.google.com/forms/d/e/1FAIpQLSee8cooW4X30MAjZxSt7DbEcgyk3XpbOYFAxz7tDYEQvbuQ8w/viewform
-
-### Step 2: Set Up Vertex AI
-1. Enable Vertex AI API
-2. Set up billing (required)
-3. Deploy WeatherNext 2 model
-4. Use Colab notebook for inference
-
-### Step 3: Real-time API Access
-```python
-from vertexai.preview.model_garden import ModelGarden
-
-# Deploy WeatherNext 2
-model = ModelGarden.get_model("weather-next-v2")
-endpoint = model.deploy()
-
-# Generate forecasts
-forecast = endpoint.predict(
-    location="Tokyo",
-    lead_time_hours=168,
-    ensemble_members=31
-)
-```
-
 ## 💡 Recommendation
 
-**Start with Earth Engine** because:
-- ✅ Free access to ensemble data
-- ✅ No billing required
-- ✅ Perfect for backtesting
-- ✅ Can upgrade to Vertex AI later
-
-**Upgrade to Vertex AI** when:
-- You need real-time forecasts
-- System is profitable
-- Want custom inference
+**Earth Engine is the recommended path** because:
+- Free access to ensemble data
+- No billing required
+- Perfect for backtesting
 
 ## 🎯 Next Steps
 

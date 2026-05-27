@@ -1,70 +1,30 @@
-# PROJECT SENTINEL - Configuration
-# Phase 2: Weather Data Ingestion Engine
+# WeatherNext Pro — Configuration
+# Polymarket temperature prediction using WeatherNext 2 forecasts
 
-data_lake:
-  path: "/home/ubuntu/project-sentinel/data"
-  retention_hours: 24
-  
 weather_api:
   base_url: "https://weather.googleapis.com/v1"
   api_key: "${GMAPS_API_KEY}"
-  update_interval_minutes: 15
-  target_markets:
-    - slug: "highest-temp-london"
-      city: "London"
-      lat: 51.5074
-      lng: -0.1278
-    - slug: "highest-temp-singapore"
-      city: "Singapore"
-      lat: 1.3521
-      lng: 103.8198
-    - slug: "highest-temp-seoul"
-      city: "Seoul"
-      lat: 37.5665
-      lng: 126.9780
-    - slug: "highest-temp-shanghai"
-      city: "Shanghai"
-      lat: 31.2304
-      lng: 121.4737
-  
-dask:
-  workers: 2
-  threads_per_worker: 1
-  memory_limit: "800MB"
-  dashboard_port: 8787
-  
-logging:
-  level: "INFO"
-  file: "/home/ubuntu/project-sentinel/logs/data_watcher.log"
-  max_size_mb: 100
-  backup_count: 5
-  
-gcp_bridge:
-  cloud_run_url: "https://sentinel-reasoning-895191182806.asia-east2.run.app"
-  timeout_seconds: 30
-  
-gemini_pro:
-  api_key: "${GEMINI_API_KEY}"
-  model: "gemini-2.5-pro"
-  temperature: 0.7
-  max_tokens: 2048
-  
-telegram:
-  bot_token: "${TELEGRAM_BOT_TOKEN}"
-  chat_id: "${TELEGRAM_CHAT_ID}"
 
-# Phase 4: Trading & Execution
+scanner:
+  interval_minutes: 30         # how often to scan Polymarket for opportunities
+  request_delay: 0.3           # seconds between API calls (rate limiting)
+  ensemble_weight: 0.5         # 0=Google only, 1=Ensemble only, 0.5=equal blend
+
 trading:
-  paper_trading: true        # set to false for live trading
+  paper_trading: true          # set to false for live trading
   require_2fa: true
-  min_edge_pct: 10.0          # only trade if our prob differs from market by >10%
-  max_position_usdc: 20.0    # max $20 per trade
-  
+  min_edge_pct: 25.0           # only trade if our prob differs from market by >25%
+  max_position_usdc: 20.0      # max $20 per trade
+
 polymarket:
   api_key: "${POLYMARKET_API_KEY}"
   api_secret: "${POLYMARKET_API_SECRET}"
   clob_url: "https://clob.polymarket.com"
   gamma_url: "https://gamma-api.polymarket.com"
+
+telegram:
+  bot_token: "${TELEGRAM_BOT_TOKEN}"
+  chat_id: "${TELEGRAM_CHAT_ID}"
 
 risk_management:
   max_position_size: 500

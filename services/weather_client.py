@@ -20,12 +20,30 @@ class DailyForecast:
     high_temp_c: float               # upper bound (uncertainty)
     precip_prob: float               # probability of precipitation 0–1
     fetched_at: datetime = None
+    # Min temp fields (for lowest-temperature markets)
+    forecast_min_temp_c: float = None
+    min_low_c: float = None
+    min_high_c: float = None
 
     def _cdf(self, x: float) -> float:
         """P(max_temp <= x) — internal Gaussian CDF."""
         import math
         mean  = self.forecast_max_temp_c
         sigma = (self.high_temp_c - self.low_temp_c) / (2 * 1.645)
+        if sigma <= 0:
+            return 0.0 if mean > x else 1.0
+        z = (x - mean) / (sigma * math.sqrt(2))
+        return 0.5 * (1 + math.erf(z))
+
+    def _cdf_min(self, x: float) -> float:
+        """P(min_temp <= x) — Gaussian CDF for min temperature."""
+        import math
+        if self.forecast_min_temp_c is None:
+            return 0.5
+        mean = self.forecast_min_temp_c
+        low = self.min_low_c if self.min_low_c is not None else mean - 2
+        high = self.min_high_c if self.min_high_c is not None else mean + 2
+        sigma = (high - low) / (2 * 1.645)
         if sigma <= 0:
             return 0.0 if mean > x else 1.0
         z = (x - mean) / (sigma * math.sqrt(2))
@@ -46,6 +64,18 @@ class DailyForecast:
         E.g. bracket '10°C' → low=9.5, high=10.5
         """
         return round(max(0.0, self._cdf(high_c) - self._cdf(low_c)), 4)
+
+    def prob_min_exceeds(self, threshold_c: float) -> float:
+        """P(min_temp > threshold) — for lowest-temp 'or higher' markets."""
+        return round(1.0 - self._cdf_min(threshold_c), 4)
+
+    def prob_min_at_or_below(self, threshold_c: float) -> float:
+        """P(min_temp <= threshold) — for lowest-temp 'or below' markets."""
+        return round(self._cdf_min(threshold_c), 4)
+
+    def prob_min_in_bracket(self, low_c: float, high_c: float) -> float:
+        """P(low_c <= min_temp < high_c) — for lowest-temp exact/range markets."""
+        return round(max(0.0, self._cdf_min(high_c) - self._cdf_min(low_c)), 4)
 
 
 class WeatherClient:
@@ -95,6 +125,15 @@ class WeatherClient:
             high = temp_range.get("maxTemperature", {}).get("degrees", max_temp + 2)
             precip_prob = daytime.get("precipitationProbability", 0) / 100.0
 
+            # Min temperature
+            min_temp_info = day.get("minTemperature", {})
+            min_temp = min_temp_info.get("degrees", None)
+            min_low = None
+            min_high = None
+            if min_temp is not None:
+                min_low = min_temp - 2
+                min_high = min_temp + 2
+
             forecast = DailyForecast(
                 city=city,
                 date=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
@@ -103,8 +142,11 @@ class WeatherClient:
                 high_temp_c=float(high),
                 precip_prob=precip_prob,
                 fetched_at=datetime.now(timezone.utc),
+                forecast_min_temp_c=float(min_temp) if min_temp else None,
+                min_low_c=float(min_low) if min_low else None,
+                min_high_c=float(min_high) if min_high else None,
             )
-            logger.info(f"{city}: max={max_temp}°C range=[{low}, {high}] precip={precip_prob:.0%}")
+            logger.info(f"{city}: max={max_temp}°C range=[{low}, {high}] min={min_temp}°C precip={precip_prob:.0%}")
             return forecast
 
         except httpx.HTTPStatusError as e:
