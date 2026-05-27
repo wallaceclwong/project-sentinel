@@ -52,6 +52,7 @@ config/secrets.yaml
 # OS
 .DS_Store
 Thumbs.db
+.claude/
 
 # Cloud Run
 cloud_run/.dockerignore
